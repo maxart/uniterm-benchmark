@@ -164,6 +164,7 @@ fn overlay_proc_cpu_times(_processes: &mut BTreeMap<u32, ProcessInfo>) {}
 
 /// Parses utime and stime (fields 14 and 15) from a `/proc/<pid>/stat` line. The command name
 /// can contain spaces and parentheses, so fields are located after the final `)`.
+#[cfg(any(target_os = "linux", test))]
 fn parse_proc_stat_cpu_seconds(stat: &str, ticks_per_second: f64) -> Option<f64> {
     let rest = &stat[stat.rfind(')')? + 1..];
     let mut fields = rest.split_whitespace();
