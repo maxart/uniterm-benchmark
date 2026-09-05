@@ -39,35 +39,53 @@ pub struct IsolatedWorkdir {
 
 impl IsolatedWorkdir {
     pub fn create(label: &str, keep: bool) -> Result<Self, String> {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        use std::sync::OnceLock;
+        static NEXT_NONCE: OnceLock<AtomicU64> = OnceLock::new();
+
         let label: String = label
             .chars()
             .filter(char::is_ascii_alphanumeric)
             .take(8)
             .collect();
-        let nonce = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_nanos();
-        let root = std::env::temp_dir().join(format!(
-            "utc-{}-{}-{:08x}",
-            label,
-            std::process::id(),
-            nonce & 0xffff_ffff
-        ));
-        let home = root.join("home");
-        let runtime = root.join("runtime");
-        let state = root.join("state");
-        let config = root.join("config");
+        // A clock read alone can repeat across concurrent calls, especially on macOS.
+        let counter = NEXT_NONCE.get_or_init(|| {
+            AtomicU64::new(
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_nanos() as u64,
+            )
+        });
         let mut builder = std::fs::DirBuilder::new();
         #[cfg(unix)]
         {
             use std::os::unix::fs::DirBuilderExt;
             builder.mode(0o700);
         }
-        // Exclusive creation avoids adopting an existing directory or following a symlink.
-        builder
-            .create(&root)
-            .map_err(|error| format!("could not create private workdir: {error}"))?;
+        let mut root = None;
+        for _ in 0..128 {
+            let candidate = std::env::temp_dir().join(format!(
+                "utc-{}-{}-{:08x}",
+                label,
+                std::process::id(),
+                counter.fetch_add(1, Ordering::Relaxed) & 0xffff_ffff
+            ));
+            // Never adopt an existing directory or follow a symlink. Retry stale names.
+            match builder.create(&candidate) {
+                Ok(()) => {
+                    root = Some(candidate);
+                    break;
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+                Err(error) => return Err(format!("could not create private workdir: {error}")),
+            }
+        }
+        let root = root.ok_or("could not create a unique private workdir")?;
+        let home = root.join("home");
+        let runtime = root.join("runtime");
+        let state = root.join("state");
+        let config = root.join("config");
         let mut workdir = Self {
             root,
             home,

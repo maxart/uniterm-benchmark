@@ -177,6 +177,28 @@ fn workdir_tree_is_owner_only_and_unicode_labels_are_safe() {
 }
 
 #[test]
+fn concurrent_workdirs_have_distinct_names_and_independent_cleanup() {
+    use std::collections::BTreeSet;
+    use std::sync::{Arc, Barrier};
+    let barrier = Arc::new(Barrier::new(32));
+    let threads: Vec<_> = (0..32)
+        .map(|_| {
+            let barrier = Arc::clone(&barrier);
+            std::thread::spawn(move || {
+                barrier.wait();
+                IsolatedWorkdir::create("parallel", false).unwrap()
+            })
+        })
+        .collect();
+    let workdirs: Vec<_> = threads.into_iter().map(|t| t.join().unwrap()).collect();
+    let roots: BTreeSet<_> = workdirs.iter().map(|w| w.root.clone()).collect();
+    assert_eq!(roots.len(), 32);
+    assert!(roots.iter().all(|root| root.is_dir()));
+    drop(workdirs);
+    assert!(roots.iter().all(|root| !root.exists()));
+}
+
+#[test]
 fn aliases_are_idempotent_for_double_digit_contender_counts() {
     let mut original = fixture();
     let template = original.contenders[0].clone();
