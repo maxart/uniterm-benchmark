@@ -1,0 +1,105 @@
+# Optional contender: append to comparison.local.toml in the repository root.
+[[contenders]]
+id = "tmux"
+display_name = "tmux"
+adapter = "tmux"
+binary = ".artifacts/tmux-target/release/tmux"
+source = ".artifacts/tmux-src"
+
+[[contenders.assurance]]
+category = "security"
+criterion = "Memory-safety boundary"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "security"
+criterion = "Local IPC access control"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "security"
+criterion = "Untrusted protocol input bounds"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "security"
+criterion = "Crash-safe persistence"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "security"
+criterion = "Update integrity"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "security"
+criterion = "Extension trust boundary"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "security"
+criterion = "Remote exposure and authentication"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "security"
+criterion = "Child-process containment"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "privacy"
+criterion = "Telemetry and analytics"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "privacy"
+criterion = "Default outbound network activity"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "privacy"
+criterion = "Local data retention"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "privacy"
+criterion = "Clipboard and host-data access"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "privacy"
+criterion = "Remote data path"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []
+
+[[contenders.assurance]]
+category = "privacy"
+criterion = "Network controls"
+status = "unknown"
+summary = "Not reviewed. Supply your own assessment locally."
+evidence = []

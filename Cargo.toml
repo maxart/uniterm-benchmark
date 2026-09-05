@@ -1,0 +1,26 @@
+[package]
+name = "ut-compare"
+version = "0.3.0"
+edition = "2021"
+rust-version = "1.85"
+description = "Reproducible, cross-platform performance and assurance comparison for terminal multiplexers"
+license = "MIT"
+authors = ["MAXART <max@maxart.me>"]
+repository = "https://github.com/maxart/uniterm-benchmark"
+include = ["/Cargo.toml", "/Cargo.lock", "/LICENSE", "/README.md", "/src/**", "/tests/**", "/docs/METHODOLOGY.md", "/docs/PRIVACY.md", "/docs/ASSURANCE.md", "/comparison.toml", "/tmux.contender.toml"]
+
+[[bin]]
+name = "ut-compare"
+path = "src/main.rs"
+
+[dependencies]
+libc = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+sha2 = "0.10"
+toml = "0.8"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
