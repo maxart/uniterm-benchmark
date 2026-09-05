@@ -25,20 +25,21 @@ impl PtyChild {
     pub fn spawn(command: &mut Command, cols: u16, rows: u16) -> Result<Self, String> {
         let mut master_fd: RawFd = -1;
         let mut slave_fd: RawFd = -1;
-        let size = libc::winsize {
+        let mut size = libc::winsize {
             ws_row: rows,
             ws_col: cols,
             ws_xpixel: 0,
             ws_ypixel: 0,
         };
-        // SAFETY: openpty initializes both descriptors and only reads the supplied winsize.
+        // SAFETY: openpty initializes both descriptors; size is a live, exclusive local.
+        // Darwin's binding takes mutable pointers, which also coerce to Linux's const inputs.
         if unsafe {
             libc::openpty(
                 &mut master_fd,
                 &mut slave_fd,
                 std::ptr::null_mut(),
-                std::ptr::null(),
-                &size,
+                std::ptr::null_mut(),
+                std::ptr::addr_of_mut!(size),
             )
         } < 0
         {
